@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load staticfiles i18n %}
+{% block content %}
+    <table class="table table-striped table-bordered">
+        <tr>
+            <th>Code</th>
+            <th>Activated</th>
+            <th>Date d'activation</th>
+            <th>Expiration</th>
+            <th>Date d'expiration</th>
+        </tr>
+        {% for lcse in license %}
+            <tr>
+                <td>{{ lcse.code}}</td>
+                <td>{{ lcse.isactivated }}</td>
+                <td>{{ lcse.activation_date }}</td>
+                <td>{{ lcse.can_expired }}</td>
+                <td>{{ lcse.expiration_date }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

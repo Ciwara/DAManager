@@ -1,0 +1,10 @@
+
+*.sqlite3
+
+*.pyc
+
+DAManager/settings_local.py
+migrations/
+static/
+
+*.fad
