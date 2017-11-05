@@ -59,8 +59,6 @@ class UserCreationForm(forms.ModelForm):
 
 
 class LicenseForm(forms.ModelForm):
-    print("LicenseForm")
-
     class Meta:
         model = License
         exclude = ["isactivated", "activation_date", "expiration_date"]

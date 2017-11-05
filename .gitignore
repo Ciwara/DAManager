@@ -6,5 +6,6 @@
 DAManager/settings_local.py
 migrations/
 static/
-
+setups/*
 *.fad
+*.exe
