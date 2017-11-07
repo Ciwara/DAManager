@@ -154,6 +154,7 @@ class Application(models.Model):
         except cls.DoesNotExist:
             return None
 
+    @property
     def get_setups(self):
         return Setup.objects.filter(app=self).order_by("-version_number")
 
@@ -176,17 +177,18 @@ class Setup(models.Model):
 
 
 class Hot(models.Model):
-    ram = models.CharField(max_length=15)
-    rom = models.CharField(max_length=15)
-    username = models.CharField(max_length=15)
+    ram = models.CharField(max_length=15, verbose_name="RAM")
+    rom = models.CharField(max_length=15, verbose_name="ROM")
+    username = models.CharField(
+        max_length=15, verbose_name="Nom d'utilisateur")
 
     def __str__(self):
-        return self.username
+        return "{}".format(self.username)
 
 
 class License(models.Model):
 
-    hot = models.ForeignKey(Hot, verbose_name="Propriétaire")
+    hot = models.ForeignKey(Hot, verbose_name="Machine")
     author = models.ForeignKey(Owner, verbose_name="Propriétaire")
     app = models.ForeignKey(Application, verbose_name="Application")
     setup = models.ForeignKey(Setup, verbose_name="Installer")

@@ -4,15 +4,20 @@ from datetime import datetime
 
 from django.shortcuts import render
 # from django.views.decorators.csrf import csrf_protect
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 # from django.core import serializers
 # from desktop.forms import LicenseForm
-from desktop.models import License, Owner, Application, Hot
+from desktop.models import License, Owner, Application, Hot, Setup
 
 
 def index(request, *args, **kwargs):
-    lcse = License.objects.all()
-    return render(request, 'dashboard.html', {"license": lcse})
+    apps = Application.objects.all()
+    return render(request, 'index.html', {"apps": apps})
+
+
+def dashboard(request, *args, **kwargs):
+    apps = Application.objects.all()
+    return render(request, 'dashboard.html', {"apps": apps})
 
 
 def get_license(request, code):
@@ -99,3 +104,11 @@ def add_license(request, *args, **kwargs):
 
     return JsonResponse({
         'status': 'succes', 'message': "OK"})
+
+
+def dl_setup(request, setup):
+    # Create the HttpResponse object with the appropriate PDF headers.
+    response = HttpResponse(content_type='application/exe')
+    response['Content-Disposition'] = 'attachment; filename="%s"'.format(setup)
+
+    return response

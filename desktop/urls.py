@@ -4,6 +4,7 @@ from desktop import views
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
+    url(r'^dashboard/(?P<pk>[-\w\d]*)$', views.dashboard, name='dashboard'),
     url(r'^license$', views.add_license, name='add-license'),
     url(r'^get_license/(?P<code>[-\w\d]*)$',
         views.add_license, name='add-license'),
@@ -11,5 +12,6 @@ urlpatterns = [
         views.get_app_info, name='get-info'),
     url(r'^add_pc_info/(?P<code>[-\w\d]*)$',
         views.add_pc_info, name='add-pc-info'),
-    url(r'^update$', views.update_version, name='update')
+    url(r'^update$', views.update_version, name='update'),
+    url(r'^dl/(?P<setup>[-\w\d]*)$', views.dl_setup, name='setup')
 ]

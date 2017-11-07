@@ -1,5 +1,46 @@
 {% extends "base.html" %}
 {% load staticfiles i18n %}
 {% block content %}
-    <h1>Index</h1>
+
+<div id="wrapper">
+	<!-- /Section: intro -->
+	<div class="divider-short"></div>
+    <section id="content1" class="home-section">
+		<div class="container">
+			<div class="row text-center heading">
+				<h1>Applications d'ordinateur de bureau</h1>
+			</div>
+			{% for app in apps %}
+			<hr/>
+				<div class="row">
+					<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+						<div class="wow fadeInRight" data-wow-delay="0.3s">
+							<div class="fabellas">
+								<div class="col-md-6">
+								    <h1><i class="fa fa-desktop circled bg-skin float-left"></i> {{app.name}}</h1>
+								    <span><i class="fa fa-calendar" aria-hidden="true"></i> {{app.created_date}}</span>
+								    <p>{{app.description}}</p>
+								</div>
+								<div class="col-md-6">
+									<ul style="display: inline-flex;">
+										{% for setup in app.get_setups %}
+											<li class="buttons btn btn-default btn-lg wow fadeInLeft" style="margin: 10px;">
+												<a href="{{setup.file}}" data-wow-duration="2s" data-wow-delay="0.2s">
+													<div class="fa fa-windows fa-2x"> {{setup.version_name}}</div>
+													<h6>Numéro : {{setup.version_number}}</h6>
+													<h6><i class="fa fa-clock-o" aria-hidden="true"></i> {{setup.publish_date}}</h6>
+													<h6><i class="fa fa-download" aria-hidden="true"></i> {{setup.nb_download}} télechargement</h6>
+												</a>
+											</li>
+										{% endfor %}
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			{% endfor %}
+		</div>
+	</section>
+	<!-- /Section: content -->
 {% endblock %}

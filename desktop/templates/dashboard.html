@@ -1,4 +1,12 @@
 {% extends "base.html" %}
 {% load staticfiles i18n %}
 {% block content %}
+{% for app in apps %}
+    <h1>{{app.name}}</h1>
+    <h3>{{app.description}}</h3>
+    <h4>{{app.created_date}}</h4>
+    <h5>{{app.get_setups.version_name}}</h5>
+    <h5>{{app.get_setups.version_number}}</h5>
+    <h5>{{app.get_setups.nb_download}}</h5>
+{% endfor %}
 {% endblock %}
