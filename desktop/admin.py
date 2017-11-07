@@ -25,7 +25,7 @@ class SetupAdmin(admin.ModelAdmin):
 class SetupInline(admin.TabularInline):
 
     model = Setup
-    extra = 1
+    extra = 0
 
 
 @admin.register(Owner)
