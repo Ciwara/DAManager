@@ -51,22 +51,25 @@ def get_app_info(request, code):
 
 def update_version(request, *args, **kwargs):
     dataset = json.loads(request.body.decode('UTF-8'))
-    version_number = dataset.get("version_number")
+    hot_version_number = dataset.get("version_number")
     app_name = dataset.get("app_name")
-    app = Application.objects.get(
-        name=app_name, setup__version_number=version_number)
-    last_setup = app.get_setups()[0]
-    last_version = str(last_setup.version_number)
-    # print(version_number, "?", last_version)
     msg = "OK"
-    if last_version == version_number:
+    last = False
+    try:
+        app = Application.objects.get(name=app_name)
+    except Exception as e:
+        print(e)
+        return
+    last_setup = app.last_setup
+    url = last_setup.file.url
+    last_version = last_setup.version_number
+
+    if last_version == hot_version_number:
         last = True
     else:
-        last = False
         msg = "Une nouvelle version est disponible ({})".format(last_version)
-
-    return JsonResponse(
-        {'setup_file_url': last_setup.file.url, 'message': msg, "is_last": last})
+    return JsonResponse({
+        'setup_file_url': url, 'message': msg, "is_last": last})
 
 
 def add_pc_info(request, *args, **kwargs):

@@ -158,6 +158,10 @@ class Application(models.Model):
     def get_setups(self):
         return Setup.objects.filter(app=self).order_by("-version_number")
 
+    @property
+    def last_setup(self):
+        return self.get_setups[0]
+
 
 class Setup(models.Model):
 
