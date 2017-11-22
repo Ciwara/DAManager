@@ -8,7 +8,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
 from desktop.forms import (UserChangeForm, UserCreationForm)
-from desktop.models import (Member, License, Owner, Application, Setup)
+from desktop.models import (Member, License, Owner, Application, Setup, Host)
 
 # unregister and register again
 # admin.site.unregister(Group)
@@ -26,6 +26,12 @@ class SetupInline(admin.TabularInline):
 
     model = Setup
     extra = 0
+
+
+@admin.register(Host)
+class HostAdmin(admin.ModelAdmin):
+
+    model = Host
 
 
 @admin.register(Owner)
@@ -48,7 +54,7 @@ class ApplicationAdmin(admin.ModelAdmin):
 class LicenseAdmin(admin.ModelAdmin):
 
     model = License
-    list_filter = ['isactivated', 'author']
+    list_filter = ['isactivated', 'can_expired']
 
 
 @admin.register(Member)

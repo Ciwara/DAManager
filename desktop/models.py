@@ -120,7 +120,7 @@ class Member(AbstractBaseUser, PermissionsMixin):
 
 class Owner(models.Model):
 
-    """ Annuaire des sites du Mali"""
+    """ """
     class Meta:
         verbose_name = _('Propriétaire')
         verbose_name_plural = _('Propriétaires')
@@ -180,21 +180,23 @@ class Setup(models.Model):
             self.app, self.version_name, self.version_number)
 
 
-class Hot(models.Model):
-    ram = models.CharField(max_length=15, verbose_name="RAM")
-    rom = models.CharField(max_length=15, verbose_name="ROM")
-    username = models.CharField(
-        max_length=15, verbose_name="Nom d'utilisateur")
+class Host(models.Model):
+    author = models.ForeignKey(Owner, verbose_name="Utilisateur", blank=True)
+    processor = models.CharField(max_length=50, verbose_name="Processeur", blank=True)
+    version = models.CharField(max_length=50, verbose_name="Version sys", blank=True)
+    node = models.CharField(max_length=50, verbose_name="Note", blank=True)
+    platform = models.CharField(max_length=50, verbose_name="platform", blank=True)
+    system = models.CharField(max_length=50, verbose_name="system", blank=True)
+    ram = models.CharField(max_length=15, verbose_name="RAM", blank=True)
+    rom = models.CharField(max_length=15, verbose_name="ROM", blank=True)
 
     def __str__(self):
-        return "{}".format(self.username)
+        return "{} {}".format(self.node, self.author)
 
 
 class License(models.Model):
 
-    hot = models.ForeignKey(Hot, verbose_name="Machine")
-    author = models.ForeignKey(Owner, verbose_name="Propriétaire")
-    app = models.ForeignKey(Application, verbose_name="Application")
+    host = models.ForeignKey(Host, verbose_name="Machine")
     setup = models.ForeignKey(Setup, verbose_name="Installer")
     code = models.CharField(verbose_name="Code", max_length=15, unique=True)
     isactivated = models.BooleanField(default=True)
@@ -206,4 +208,4 @@ class License(models.Model):
 
     def __str__(self):
         return "{} - {} - {}".format(
-            self.author, self.expiration_date, self.isactivated)
+            self.host, self.expiration_date, self.isactivated)
