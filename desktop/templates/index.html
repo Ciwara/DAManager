@@ -10,7 +10,7 @@
 			<div class="row text-center heading">
 				<h1>Applications d'ordinateur de bureau</h1>
 			</div>
-			{% for app in apps %}
+			{% for app, setups in apps.items %}
 			<hr/>
 				<div class="row">
 					<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -23,9 +23,9 @@
 								</div>
 								<div class="col-md-6">
 									<ul>
-										{% for setup in app.get_setups %}
+										{% for setup in setups %}
 											<li class="buttons btn btn-default btn-lg wow fadeInLeft" style="margin: 10px;">
-												<a href="{{setup.file}}" data-wow-duration="2s" data-wow-delay="0.2s">
+												<a href="{{setup.url_display}}" data-wow-duration="2s" data-wow-delay="0.2s">
 													<div class="fa fa-windows fa-2x"> {{setup.version_name}}</div>
 													<h6>Numéro : {{setup.version_number}}</h6>
 													<h6><i class="fa fa-clock-o" aria-hidden="true"></i> {{setup.publish_date}}</h6>

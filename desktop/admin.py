@@ -8,7 +8,8 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
 from desktop.forms import (UserChangeForm, UserCreationForm)
-from desktop.models import (Member, License, Owner, Application, Setup, Host)
+from desktop.models import (Member, License, Application, Setup, Host,
+                            Organization)
 
 # unregister and register again
 # admin.site.unregister(Group)
@@ -34,10 +35,10 @@ class HostAdmin(admin.ModelAdmin):
     model = Host
 
 
-@admin.register(Owner)
-class OwnerAdmin(admin.ModelAdmin):
+@admin.register(Organization)
+class OrganizationAdmin(admin.ModelAdmin):
 
-    model = Owner
+    model = Organization
 
 
 @admin.register(Application)

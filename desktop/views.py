@@ -5,13 +5,20 @@ from datetime import datetime
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse
-# from django.core import serializers
-# from desktop.forms import LicenseForm
-from desktop.models import License, Owner, Application, Host, Setup
+from django.core.urlresolvers import reverse
+from django.shortcuts import redirect
+from desktop.models import License, Organization, Application, Host, Setup
 
 
 def index(request, *args, **kwargs):
-    apps = Application.objects.all()
+    apps = {}
+    for app in Application.objects.all():
+        list_setup = []
+        for setup in Setup.objects.filter(app=app, active=True):
+            setup.url_display = reverse("dl_setup", args=[setup.id])
+            list_setup.append(setup)
+        apps.update({app: list_setup})
+
     return render(request, 'index.html', {"apps": apps})
 
 
@@ -20,119 +27,69 @@ def dashboard(request, *args, **kwargs):
     return render(request, 'dashboard.html', {"apps": apps})
 
 
-def get_license(request, code):
-
-    lcse = License.objects.get(code=code)
-
-    data = {
-        'author': lcse.author, 'app': lcse.app,
-        'can_expired': lcse.can_expired,
-        'isactivated': lcse.isactivated,
-        'activation_date': lcse.activation_date,
-        'expiration_date': lcse.expiration_date
-    }
-    return JsonResponse(
-        {'message': "OK", "data": data})
-
-
-# def get_app_info(request, code):
-
-#     lcse_id, lcse = License.objects.update_or_create(code=code)
-#     app = Application.objects.get(id=lcse_id)
-
-#     data = {
-#         'name': app.name,
-#         'description': app.description,
-#         'created_date': app.created_date
-#     }
-#     return JsonResponse(
-#         {'message': "OK", "data": data})
-
-
-def update_version(request, *args, **kwargs):
-    dataset = json.loads(request.body.decode('UTF-8'))
-    host_version_number = dataset.get("version_number")
-    app_name = dataset.get("app_name")
-    msg = "OK"
-    last = False
-    try:
-        app = Application.objects.get(name=app_name)
-    except Exception as e:
-        print(e)
-        return
-    last_setup = app.last_setup
-    url = last_setup.file.url
-    last_version = last_setup.version_number
-
-    if last_version == host_version_number:
-        last = True
-    else:
-        msg = "Une nouvelle version est disponible ({})".format(last_version)
-    return JsonResponse({
-        'setup_file_url': url, 'message': msg, "is_last": last})
-
-
 @csrf_exempt
 def desktop_client(request, *args, **kwargs):
-    # data = {}
 
-    # hot_id, hot = Hot.objects.update_or_create(**kwargs)
     dataset = json.loads(request.body.decode('UTF-8'))
-
-    # {"app_info": {"name": "MPayments", "version": 1},
-    #  "host_info": {"processor": "Intel64 Family 6 Model 61 Stepping 4, GenuineIntel", "version": "6.2.9200", "node": "fad", "platform": "Windows-8-6.2.9200", "system": "Windows"},
-    #  "licenses": [{"code": "63c5b95438dc949a98333c8c8246da222", "isactivated": true, "activation_date": 1510210990.0, "expiration_date": 1510210990.0, "owner": "Demo", "can_expired": false},
-    #               {"code": "63c5b95438dc949a98333c8c8246da22", "isactivated": true, "activation_date": 1510576371.0, "expiration_date": 1511195234.0, "owner": "Demo", "can_expired": true}]}
-
+    msg = "OK"
     licenses = dataset.get("licenses")
     host_info = dataset.get("host_info")
     app_info = dataset.get("app_info")
-    # print(host_info)
-    try:
-        host, host_create = Host.objects.update_or_create(
-            author=Owner.objects.get(username='inconnue'), defaults=host_info)
-    except Exception as e:
-        print("TYYYYY : ", e)
-    # owner_id, owner = Owner.objects.update_or_create(**host_info)
-    # print(app_info)
-    app = Application.get_or_none(name=app_info.get("name"))
+    host_version = app_info.get("version")
+    app_name = app_info.get("name")
+    organization = dataset.get("organization")
+
+    organ, organ_create = Organization.objects.update_or_create(
+        member=None, defaults=organization)
+    host, host_create = Host.objects.update_or_create(
+        organization=organ, defaults=host_info)
+    print(app_info)
+    app = Application.get_or_none(name=app_name)
     if not app:
         print("Application non trouvée.")
         return JsonResponse({'status': 'Faild', 'message': '/!\ '})
-    setup = Setup.objects.get(app=app, version_number=app_info.get("version"))
+    last_setup = app.last_setup
+    url = last_setup.file.url
+    last_version = last_setup.version_number
+    host_setup = Setup.objects.get(app=app, version_number=host_version)
+    if int(last_version) == int(host_setup.version_number):
+        last = True
+    else:
+        last = False
+        msg = "La version {} est disponible.".format(last_version)
 
-    print(licenses)
     for lcse in licenses:
         print("lcse", lcse)
         can_expired = lcse.get("can_expired")
         data = {
-            'host': host,
-            'setup': setup,
-            'can_expired': can_expired,
-            'isactivated': lcse.get("isactivated"),
-            'activation_date': datetime.fromtimestamp(lcse.get("activation_date")),
-            'expiration_date': None if not can_expired else datetime.fromtimestamp(lcse.get("expiration_date"))
+            "host": host,
+            "setup": host_setup,
+            "can_expired": can_expired,
+            "isactivated": lcse.get("isactivated"),
+            "activation_date": datetime.fromtimestamp(
+                lcse.get("activation_date")),
+            "expiration_date": None if not can_expired else datetime.fromtimestamp(lcse.get("expiration_date"))
         }
         # data.update({})
-        msg, created = License.objects.update_or_create(
+        lcse, created = License.objects.update_or_create(
             code=lcse.get("code"), defaults=data)
-
-    # else:
-    #     owner, ok = Owner.objects.update_or_create(username=owner_name)
-    #     try:
-    #         l = License.objects.create(
-    #             app=app, code=code_lcse, author=owner,
-    #             expiration_date=expiration_date)
-    #     except Exception as e:
-    #         print(e)
-
+        is_kill = lcse.is_kill
+    # TODO
     return JsonResponse({
-        'status': 'succes', 'message': "OK"})
+        "setup_file_url": url, "message": msg, "is_last": last,
+        "version": last_version, "is_kill": is_kill})
 
 
-def dl_setup(request, setup):
+def dl_setup(request, *args, **kwargs):
+    print(kwargs)
+    setup_id = kwargs["setup_id"]
+    setup = Setup.objects.get(id=setup_id)
+    setup.nb_download += 1
+    setup.save()
+    redirect("/")
     # Create the HttpResponse object with the appropriate PDF headers.
     response = HttpResponse(content_type='application/exe')
-    response['Content-Disposition'] = 'attachment; filename="%s"'.format(setup)
+    response['Content-Disposition'] = 'attachment; filename="{}"'.format(
+        setup.file)
 
     return response

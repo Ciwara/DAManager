@@ -118,24 +118,38 @@ class Member(AbstractBaseUser, PermissionsMixin):
         return self.is_admin
 
 
-class Owner(models.Model):
+class Organization(models.Model):
 
-    """ """
-    class Meta:
-        verbose_name = _('Propriétaire')
-        verbose_name_plural = _('Propriétaires')
+    PREV = 0
+    CURRENT = 1
+    DEFAULT = 2
+    LCONFIG = ((PREV, u"Precedent"),
+               (DEFAULT, u"Par defaut"),
+               (CURRENT, u"Actuel"),)
 
-    username = models.CharField(
-        verbose_name=_("Name"), max_length=75, primary_key=True)
-    full_name = models.CharField(
-        verbose_name=_("Localité"), max_length=150, blank=True)
-    created_date = models.DateTimeField(default=timezone.now)
-    email = models.EmailField(verbose_name="Adresse email", blank=True)
-    phone = models.CharField(max_length=20, verbose_name="Tel", blank=True)
+    USA = "dollar"
+    XOF = "xof"
+    EURO = "euro"
+    DEVISE = ((USA, "$"), (XOF, "F"), (EURO, "€"))
+
+    member = models.ForeignKey(Member, verbose_name="Utilisateur", blank=True, null=True)
+    slug = models.CharField(max_length=100, choices=LCONFIG, default=DEFAULT)
+    is_login = models.BooleanField(default=True)
+    theme = models.CharField(max_length=100, default=1)
+    name_orga = models.CharField(max_length=100, verbose_name=(""))
+    phone = models.IntegerField(null=True, verbose_name=(""))
+    bp = models.CharField(max_length=100, null=True, verbose_name=(""))
+    email_org = models.CharField(max_length=100, null=True, verbose_name=(""))
+    adress_org = models.TextField(null=True, verbose_name=(""))
+    devise = models.CharField(max_length=100, choices=DEVISE, default=XOF)
+    image = models.ImageField(upload_to='images_member/', blank=True,
+                              verbose_name=("image de la societe"))
 
     def __str__(self):
-        return "{} - {} - {}".format(
-            self.username, self.created_date, self.full_name)
+        return self.display_name()
+
+    def display_name(self):
+        return u"{} {} {}".format(self.name_orga, self.phone, self.email_org)
 
 
 class Application(models.Model):
@@ -172,6 +186,7 @@ class Setup(models.Model):
     nb_download = models.IntegerField(verbose_name="Download", default=1)
     publish_date = models.DateField(
         verbose_name="Date de publication", default=timezone.now)
+    active = models.BooleanField(verbose_name="Active", default=True)
     file = models.FileField(
         upload_to='setups', blank=True, verbose_name=_("Installer"))
 
@@ -181,7 +196,8 @@ class Setup(models.Model):
 
 
 class Host(models.Model):
-    author = models.ForeignKey(Owner, verbose_name="Utilisateur", blank=True)
+    organization = models.ForeignKey(
+        Organization, verbose_name="Utilisateur", blank=True, null=True)
     processor = models.CharField(max_length=50, verbose_name="Processeur", blank=True)
     version = models.CharField(max_length=50, verbose_name="Version sys", blank=True)
     node = models.CharField(max_length=50, verbose_name="Note", blank=True)
@@ -191,7 +207,7 @@ class Host(models.Model):
     rom = models.CharField(max_length=15, verbose_name="ROM", blank=True)
 
     def __str__(self):
-        return "{} {}".format(self.node, self.author)
+        return "{} {}".format(self.node, self.organization)
 
 
 class License(models.Model):
@@ -203,9 +219,10 @@ class License(models.Model):
     activation_date = models.DateTimeField(
         verbose_name="Date d'activation", default=timezone.now)
     can_expired = models.BooleanField(default=False)
+    is_kill = models.BooleanField(default=False)
     expiration_date = models.DateTimeField(blank=True, null=True)
     update_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
-        return "{} - {} - {}".format(
+        return "{} {} {}".format(
             self.host, self.expiration_date, self.isactivated)
