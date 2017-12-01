@@ -1,4 +1,4 @@
-
+import os
 import json
 from datetime import datetime
 
@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
+from django.conf import settings
 from desktop.models import License, Organization, Application, Host, Setup
 
 
@@ -49,7 +50,7 @@ def desktop_client(request, *args, **kwargs):
         print("Application non trouvée.")
         return JsonResponse({'status': 'Faild', 'message': '/!\ '})
     last_setup = app.last_setup
-    url = last_setup.file.url
+    url = os.path.join(settings.DOMAIN, "dl/{}".format(last_setup.id))
     last_version = last_setup.version_number
     host_setup = Setup.objects.get(app=app, version_number=host_version)
     if int(last_version) == int(host_setup.version_number):

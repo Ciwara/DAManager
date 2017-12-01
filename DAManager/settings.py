@@ -128,6 +128,7 @@ SETUP_ROOT = os.path.join(BASE_DIR, 'setups')
 STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+DOMAIN = "fadcorp.ml"
 
 try:
     from DAManager.settings_local import *
