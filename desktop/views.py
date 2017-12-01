@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
-from django.conf import settings
+# from django.conf import settings
 from desktop.models import License, Organization, Application, Host, Setup
 
 
@@ -50,7 +50,7 @@ def desktop_client(request, *args, **kwargs):
         print("Application non trouvée.")
         return JsonResponse({'status': 'Faild', 'message': '/!\ '})
     last_setup = app.last_setup
-    url = os.path.join(settings.DOMAIN, "dl/{}".format(last_setup.id))
+    url = os.path.join("dl", "{}".format(last_setup.id))
     last_version = last_setup.version_number
     host_setup = Setup.objects.get(app=app, version_number=host_version)
     if int(last_version) == int(host_setup.version_number):
@@ -71,7 +71,6 @@ def desktop_client(request, *args, **kwargs):
                 lcse.get("activation_date")),
             "expiration_date": None if not can_expired else datetime.fromtimestamp(lcse.get("expiration_date"))
         }
-        # data.update({})
         lcse, created = License.objects.update_or_create(
             code=lcse.get("code"), defaults=data)
         is_kill = lcse.is_kill
@@ -82,15 +81,14 @@ def desktop_client(request, *args, **kwargs):
 
 
 def dl_setup(request, *args, **kwargs):
-    print(kwargs)
+
     setup_id = kwargs["setup_id"]
     setup = Setup.objects.get(id=setup_id)
     setup.nb_download += 1
     setup.save()
-    redirect("/")
-    # Create the HttpResponse object with the appropriate PDF headers.
-    response = HttpResponse(content_type='application/exe')
+    response = HttpResponse(
+        setup.file, content_type='application/exe')
     response['Content-Disposition'] = 'attachment; filename="{}"'.format(
         setup.file)
-
+    # redirect("/")
     return response
