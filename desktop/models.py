@@ -157,6 +157,7 @@ class Application(models.Model):
     name = models.CharField(max_length=100, verbose_name="Nom", unique=True)
     description = models.CharField(max_length=200, verbose_name="Description")
     created_date = models.DateField(verbose_name="Date de création")
+    public = models.BooleanField(default=False)
 
     def __str__(self):
         return "App. {} - {}".format(self.name, self.created_date)
@@ -174,7 +175,10 @@ class Application(models.Model):
 
     @property
     def last_setup(self):
-        return self.get_setups[0]
+        try:
+            return self.get_setups[0]
+        except:
+            return None
 
 
 class Setup(models.Model):

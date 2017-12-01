@@ -12,7 +12,7 @@ from desktop.models import License, Organization, Application, Host, Setup
 
 def index(request, *args, **kwargs):
     apps = {}
-    for app in Application.objects.all():
+    for app in Application.objects.filter(public=True):
         list_setup = []
         for setup in Setup.objects.filter(app=app, active=True):
             setup.url_display = reverse("dl_setup", args=[setup.id])
